@@ -5,6 +5,35 @@ class JobsController < ApplicationController
   # GET /jobs.json
   def index
     @jobs = Job.all
+
+    @xero = Company.where(name: 'Xero')
+    @xero_jobs = Job.where(company: @xero)
+
+    @atlassian = Company.where(name: 'Atlassian')
+    @atlassian_jobs = Job.where(company: @atlassian)
+    
+    @front_end_jobs = Job.where(front_end: true)
+    @back_end_jobs = Job.where(back_end: true)
+    
+    # Intersection
+    @full_stack_jobs = @front_end_jobs & @back_end_jobs
+
+    # Complement
+    @i_hate_backend_jobs = @jobs - @back_end_jobs
+
+    # Union
+    @xero_or_atlassian_jobs = @xero_jobs | @atlassian_jobs
+
+    # Subset
+    @finance_companies = Company.where(industry: 'finance')
+    @finance_jobs = Job.where(company: @finance_companies)
+
+    # Difference
+    @non_finance_full_stack_jobs = @full_stack_jobs - @finance_jobs
+
+    # Textual search
+    @javascript_jobs = Job.where('title LIKE ? OR description LIKE ?', "%javascript%", "%javascript%")
+
   end
 
   # GET /jobs/1
