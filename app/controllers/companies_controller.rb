@@ -5,6 +5,32 @@ class CompaniesController < ApplicationController
   # GET /companies.json
   def index
     @companies = Company.all
+
+    @finance_companies = Company.where(industry: 'finance')
+    @productivity_companies = Company.where(industry: 'productivity')
+    @ecommerce_companies = Company.where(industry: 'ecommerce')
+    @utility_companies = Company.where(industry: 'utility')
+
+    # @companies_hiring = []
+    # Company.all.each do |company|
+    #   @companies_hiring << company if company.jobs.count > 0
+    # end
+
+    # All companies that have relationships to jobs,
+    # and then ensure companies aren't repeated with 'distinct'
+    @companies_hiring = Company.all.joins(:jobs).distinct
+
+    # Intersection - Companies in Finance and also Hiring
+    @finance_companies_hiring = @finance_companies & @companies_hiring
+
+    # Union - Companies either in the Ecommerce and Utility industries
+    @union_companies = @ecommerce_companies | @utility_companies
+
+    # Complement - Companies with no jobs that there not hiring (complement)
+    @companies_not_hiring = Company.where.not(id: @companies_hiring)
+
+    # Difference - Companies hiring excluding those in finance (difference)
+    @non_finance_companies_hiring = @companies_hiring - @finance_companies
   end
 
   # GET /companies/1
@@ -69,6 +95,6 @@ class CompaniesController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def company_params
-      params.require(:company).permit(:name, :type)
+      params.require(:company).permit(:name, :industry)
     end
 end
